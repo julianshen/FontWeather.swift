@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "FontWeather.swift"
-  s.version          = "0.8.0"
+  s.version          = "0.8.1"
   s.summary          = "Use Weather icons in your Swift projects"
   s.homepage         = "https://github.com/julianshen/FontWeather.swift"
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
