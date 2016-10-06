@@ -23,6 +23,9 @@
 import UIKit
 
 /// A view for FontWeather icons.
+#if os(iOS)
+import CoreText
+    
 @IBDesignable class FontWeatherView : UIView {
     
     @IBInspectable
@@ -72,3 +75,8 @@ import UIKit
     }
     
 }
+#else
+class FontWeatherView
+{
+}
+#endif

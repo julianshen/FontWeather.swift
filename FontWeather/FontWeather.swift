@@ -20,8 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if os(iOS)
 import UIKit
 import CoreText
+#elseif os(watchOS)
+import WatchKit
+//    import CoreText
+#endif
 
 // MARK: - Public
 
@@ -96,7 +101,7 @@ public extension UIImage {
         attributedString.drawInRect(CGRectMake(0, (size.height - fontSize) / 2, size.width, fontSize))
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return image
+        return image!
     }
 }
 
@@ -118,13 +123,15 @@ private class FontLoader {
         let data = NSData(contentsOfURL: fontURL)!
 
         let provider = CGDataProviderCreateWithCFData(data)
-        let font = CGFontCreateWithDataProvider(provider)!
+        let font = CGFontCreateWithDataProvider(provider!)
 
         var error: Unmanaged<CFError>?
-        if !CTFontManagerRegisterGraphicsFont(font, &error) {
+    #if os(iOS)
+        if !CoreText.CTFontManagerRegisterGraphicsFont(font, &error) {
             let errorDescription: CFStringRef = CFErrorCopyDescription(error!.takeUnretainedValue())
             let nsError = error!.takeUnretainedValue() as AnyObject as! NSError
             NSException(name: NSInternalInconsistencyException, reason: errorDescription as String, userInfo: [NSUnderlyingErrorKey: nsError]).raise()
         }
+    #endif
     }
 }
