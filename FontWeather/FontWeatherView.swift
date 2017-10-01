@@ -31,7 +31,7 @@ import CoreText
     @IBInspectable
     var iconCode:String = "" {
         didSet{
-            self.iconView.text = String.fontWeatherIconWithCode(iconCode)
+            self.iconView.text = String.icon(iconCode)
         }
     }
     
@@ -57,9 +57,9 @@ import CoreText
     func setupViews(){
         self.iconView = UILabel()
         // Fits icon in the view
-        iconView.font = UIFont.fontWeatherOfSize(bounds.size.width < bounds.size.height ? bounds.size.width : bounds.size.height)
-        iconView.textAlignment = NSTextAlignment.Center
-        iconView.text = String.fontWeatherIconWithCode(self.iconCode)
+        iconView.font = UIFont.fontWeatherOfSize(fontSize: bounds.size.width < bounds.size.height ? bounds.size.width : bounds.size.height)
+        iconView.textAlignment = NSTextAlignment.center
+        iconView.text = String.icon(self.iconCode)
         iconView.textColor = self.tintColor
         self.addSubview(iconView)
     }
@@ -71,7 +71,7 @@ import CoreText
     override func layoutSubviews() {
         super.layoutSubviews()
         self.clipsToBounds = true
-        iconView.frame = CGRectMake(0, 0, bounds.size.width, bounds.size.height)
+        iconView.frame = CGRect.init(x: 0, y: 0, width: bounds.size.width, height: bounds.size.height)
     }
     
 }

@@ -38,20 +38,15 @@ public extension UIFont {
     /// - parameter fontSize: The preferred font size.
     /// - returns: A UIFont object of FontWeather.
     public class func fontWeatherOfSize(fontSize: CGFloat) -> UIFont {
-        struct Static {
-            static var onceToken : dispatch_once_t = 0
-        }
-
-        let name = "FontWeather"
-        if UIFont.fontNamesForFamilyName(name).isEmpty {
-            dispatch_once(&Static.onceToken) {
-                FontLoader.loadFont(name)
-            }
-        }
-
         let fontName = "Weather Icons"
+        if (UIFont.fontNames(forFamilyName: fontName).count == 0)
+        {
+            let fontFileName = "WeatherIcons-Regular.ttf"
+            FontLoader.loadFont(fontFileName)
+        }
         return UIFont(name: fontName, size: fontSize)!
     }
+    
 }
 
 /// A FontWeather extension to String.
@@ -61,77 +56,84 @@ public extension String {
     ///
     /// - parameter name: The preferred icon name.
     /// - returns: A string that will appear as icon with FontWeather.
-    public static func fontWeatherIconWithName(name: FontWeather) -> String {
-        return name.rawValue.substringToIndex(name.rawValue.startIndex.advancedBy(1))
-    }
-
-    /// Get a FontWeather icon string with the given CSS icon code. Icon code can be found here: http://fontWeather.io/icons/
-    ///
-    /// - parameter code: The preferred icon name.
-    /// - returns: A string that will appear as icon with FontWeather.
-    public static func fontWeatherIconWithCode(code: String) -> String? {
-        guard let raw = FontWeatherIcons[code], icon = FontWeather(rawValue: raw) else {
-            return nil
+    public static func icon(_ code: String) -> String? {
+        if let icon = FontWeather.fromCode(code: code) {
+            return icon.rawValue
         }
-
-        return self.fontWeatherIconWithName(icon)
+        return nil
     }
+
 }
 
 /// A FontWeather extension to UIImage.
 public extension UIImage {
 
-    /// Get a FontWeather image with the given icon name, text color, size and an optional background color.
+    /// Get a FontWeather image with the given icon code, text color, size and an optional background color.
     ///
-    /// - parameter name: The preferred icon name.
+    /// - parameter code: The preferred icon code.
     /// - parameter textColor: The text color.
     /// - parameter size: The image size.
     /// - parameter backgroundColor: The background color (optional).
     /// - returns: A string that will appear as icon with FontWeather
-    public static func fontWeatherIconWithName(name: FontWeather, textColor: UIColor, size: CGSize, backgroundColor: UIColor = UIColor.clearColor()) -> UIImage {
+    public static func fontWeatherIconWithCode(code: String, textColor: UIColor, size: CGSize, backgroundColor: UIColor = .clear) -> UIImage {
         let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = NSTextAlignment.Center
+        paragraph.alignment = .center
         
         // Taken from FontWeather.io's Fixed Width Icon CSS
         let fontAspectRatio: CGFloat = 1.28571429
         
         let fontSize = min(size.width / fontAspectRatio, size.height)
-        let attributedString = NSAttributedString(string: String.fontWeatherIconWithName(name), attributes: [NSFontAttributeName: UIFont.fontWeatherOfSize(fontSize), NSForegroundColorAttributeName: textColor, NSBackgroundColorAttributeName: backgroundColor, NSParagraphStyleAttributeName: paragraph])
+        let string = String.icon(code)
+        let font = UIFont.fontWeatherOfSize(fontSize: fontSize)
+        let attributes = [NSFontAttributeName: font,
+                          NSForegroundColorAttributeName: textColor,
+                          NSBackgroundColorAttributeName: backgroundColor,
+                          NSParagraphStyleAttributeName: paragraph]
+        let attributedString = NSAttributedString(string: string!, attributes: attributes)
         UIGraphicsBeginImageContextWithOptions(size, false , 0.0)
-        attributedString.drawInRect(CGRectMake(0, (size.height - fontSize) / 2, size.width, fontSize))
+        let rw = CGRect(x: 0, y: (size.height - fontSize) / 2, width: size.width, height: fontSize)
+        attributedString.draw(in: rw)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image!
     }
 }
 
+
+
 // MARK: - Private
 
 private class FontLoader {
-    class func loadFont(name: String) {
-        let bundle = NSBundle(forClass: FontLoader.self)
-        var fontURL = NSURL()
-        let identifier = bundle.bundleIdentifier
-
-        if identifier?.hasPrefix("org.cocoapods") == true {
-            // If this framework is added using CocoaPods, resources is placed under a subdirectory
-            fontURL = bundle.URLForResource(name, withExtension: "ttf", subdirectory: "FontWeather.swift.bundle")!
-        } else {
-            fontURL = bundle.URLForResource(name, withExtension: "ttf")!
+    class func loadFont(_ fontName: String) {
+        
+        let bundle = Bundle(for: FontLoader.self)
+        var fontURL = URL(string: "")
+        for filePath : String in bundle.paths(forResourcesOfType: "ttf", inDirectory: nil) {
+            let filename = NSURL(fileURLWithPath: filePath).lastPathComponent!
+            if filename.lowercased().range(of: fontName.lowercased()) != nil {
+                fontURL = NSURL(fileURLWithPath: filePath) as URL
+                break;
+            }
         }
-
-        let data = NSData(contentsOfURL: fontURL)!
-
-        let provider = CGDataProviderCreateWithCFData(data)
-        let font = CGFontCreateWithDataProvider(provider!)
-
-        var error: Unmanaged<CFError>?
-    #if os(iOS)
-        if !CoreText.CTFontManagerRegisterGraphicsFont(font, &error) {
-            let errorDescription: CFStringRef = CFErrorCopyDescription(error!.takeUnretainedValue())
-            let nsError = error!.takeUnretainedValue() as AnyObject as! NSError
-            NSException(name: NSInternalInconsistencyException, reason: errorDescription as String, userInfo: [NSUnderlyingErrorKey: nsError]).raise()
+        
+        do
+        {
+            let data = try Data(contentsOf: fontURL!)
+            
+            let provider = CGDataProvider(data: data as CFData)
+            let font = CGFont.init(provider!)
+            
+            var error: Unmanaged<CFError>?
+            if !CTFontManagerRegisterGraphicsFont(font, &error) {
+                let errorDescription: CFString = CFErrorCopyDescription(error!.takeUnretainedValue())
+                let nsError = error!.takeUnretainedValue() as AnyObject as! NSError
+                NSException(name: NSExceptionName.internalInconsistencyException, reason: errorDescription as String, userInfo: [NSUnderlyingErrorKey: nsError]).raise()
+            }
+            
+        } catch {
+            
         }
-    #endif
+        
+        
     }
 }
