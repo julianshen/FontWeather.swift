@@ -76,23 +76,23 @@ public extension UIImage {
     /// - parameter backgroundColor: The background color (optional).
     /// - returns: A string that will appear as icon with FontWeather
     public static func fontWeatherIconWithCode(code: String, textColor: UIColor, size: CGSize, backgroundColor: UIColor = .clear) -> UIImage {
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = .center
-        
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = NSTextAlignment.center
+
         // Taken from FontWeather.io's Fixed Width Icon CSS
         let fontAspectRatio: CGFloat = 1.28571429
         
         let fontSize = min(size.width / fontAspectRatio, size.height)
-        let string = String.icon(code)
         let font = UIFont.fontWeatherOfSize(fontSize: fontSize)
-        let attributes = [NSFontAttributeName: font,
-                          NSForegroundColorAttributeName: textColor,
-                          NSBackgroundColorAttributeName: backgroundColor,
-                          NSParagraphStyleAttributeName: paragraph]
-        let attributedString = NSAttributedString(string: string!, attributes: attributes)
-        UIGraphicsBeginImageContextWithOptions(size, false , 0.0)
-        let rw = CGRect(x: 0, y: (size.height - fontSize) / 2, width: size.width, height: fontSize)
-        attributedString.draw(in: rw)
+        let icon = String.icon(code)
+
+        let rw = CGRect(x:0, y:0, width:size.width, height:size.height)
+        let attributes = [NSFontAttributeName : font,
+                          NSParagraphStyleAttributeName: paragraphStyle, NSForegroundColorAttributeName: textColor]
+        
+        icon!.draw(in: rw, withAttributes: attributes)
+        
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image!
