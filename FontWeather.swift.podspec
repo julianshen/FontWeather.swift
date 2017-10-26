@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.source_files = 'FontWeather/*.{swift}'
-  s.resource  = "FontWeather/FontWeather.ttf"
+  s.resource  = "FontWeather/WeatherIcons-Regular.ttf"
   s.ios.frameworks = 'UIKit', 'CoreText'
   s.watchos.frameworks = 'WatchKit', 'CoreText'
 end

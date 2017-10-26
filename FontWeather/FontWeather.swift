@@ -88,8 +88,8 @@ public extension UIImage {
         let icon = String.icon(code)
 
         let rw = CGRect(x:0, y:0, width:size.width, height:size.height)
-        let attributes = [NSFontAttributeName : font,
-                          NSParagraphStyleAttributeName: paragraphStyle, NSForegroundColorAttributeName: textColor]
+        let attributes = [NSAttributedStringKey.font : font,
+                          NSAttributedStringKey.paragraphStyle: paragraphStyle, NSAttributedStringKey.foregroundColor: textColor]
         
         icon!.draw(in: rw, withAttributes: attributes)
         
@@ -124,7 +124,7 @@ private class FontLoader {
             let font = CGFont.init(provider!)
             
             var error: Unmanaged<CFError>?
-            if !CTFontManagerRegisterGraphicsFont(font, &error) {
+            if !CTFontManagerRegisterGraphicsFont(font!, &error) {
                 let errorDescription: CFString = CFErrorCopyDescription(error!.takeUnretainedValue())
                 let nsError = error!.takeUnretainedValue() as AnyObject as! NSError
                 NSException(name: NSExceptionName.internalInconsistencyException, reason: errorDescription as String, userInfo: [NSUnderlyingErrorKey: nsError]).raise()
