@@ -9,9 +9,11 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '8.0'
   s.tvos.deployment_target = '9.0'
+  s.watchos.deployment_target = '2.2'
   s.requires_arc = true
 
   s.source_files = 'FontWeather/*.{swift}'
-  s.resource_bundle = { 'FontWeather.swift' => 'FontWeather/*.ttf' }
-  s.frameworks = 'UIKit', 'CoreText'
+  s.resource  = "FontWeather/WeatherIcons-Regular.ttf"
+  s.ios.frameworks = 'UIKit', 'CoreText'
+  s.watchos.frameworks = 'WatchKit', 'CoreText'
 end

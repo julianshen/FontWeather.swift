@@ -248,7 +248,7 @@ public enum FontWeather: String {
     /// - parameter code: The preferred icon name.
     /// - returns: FontWeather icon.
     public static func fromCode(code: String) -> FontWeather? {
-        guard let raw = FontWeatherIcons[code], icon = FontWeather(rawValue: raw) else {
+        guard let raw = FontWeatherIcons[code], let icon = FontWeather(rawValue: raw) else {
             return nil
         }
         
